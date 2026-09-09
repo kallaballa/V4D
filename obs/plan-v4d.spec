@@ -62,6 +62,7 @@ and other data files needed at runtime by the V4D and Plan modules.
 Summary:        OpenCV+Plan-V4D shared libraries
 Group:          System/Libraries
 Requires:       plan-v4d-data = %{epoch}:%{version}-%{release}
+Requires:       plan-v4d-docs = %{epoch}:%{version}-%{release}
 Requires(post):   /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
@@ -92,6 +93,18 @@ Recommends:     ffmpeg
 %description -n plan-v4d-libs
 Shared libraries for OpenCV built with the Plan-DSL and V4D visualization
 modules. Includes support for FFmpeg, Qt5, OpenGL, OpenCL, and VA-API.
+
+# --------------------------------------------------------------------
+
+%package -n plan-v4d-docs
+Summary:        Documentation for OpenCV+Plan-V4D
+Group:          Documentation
+BuildArch:      noarch
+
+%description -n plan-v4d-docs
+Plan-DSL programming guide, V4D application programming guide,
+sample walkthroughs, and module READMEs for OpenCV with Plan-DSL
+and V4D visualization modules.
 
 # --------------------------------------------------------------------
 
@@ -324,6 +337,41 @@ install -d %{buildroot}%{_docdir}/%{name}
 install -m 0644 LICENSE        %{buildroot}%{_docdir}/%{name}/LICENSE
 install -m 0644 CONTRIBUTING.md %{buildroot}%{_docdir}/%{name}/CONTRIBUTING.md
 
+# ---- Plan-DSL documentation ----
+install -d %{buildroot}%{_docdir}/%{name}/plan
+install -m 0644 %{_builddir}/extra_modules/plan/README.md \
+    %{buildroot}%{_docdir}/%{name}/plan/README.md
+install -m 0644 %{_builddir}/extra_modules/plan/doc/plan-dsl-programming-guide.markdown \
+    %{buildroot}%{_docdir}/%{name}/plan/plan-dsl-programming-guide.markdown
+install -m 0644 %{_builddir}/extra_modules/plan/doc/plan-dsl-reference.markdown \
+    %{buildroot}%{_docdir}/%{name}/plan/plan-dsl-reference.markdown
+
+# ---- V4D documentation ----
+install -d %{buildroot}%{_docdir}/%{name}/v4d
+install -m 0644 %{_builddir}/extra_modules/v4d/README.md \
+    %{buildroot}%{_docdir}/%{name}/v4d/README.md
+install -m 0644 %{_builddir}/extra_modules/v4d/doc/v4d-application-programming-guide.markdown \
+    %{buildroot}%{_docdir}/%{name}/v4d/v4d-application-programming-guide.markdown
+install -d %{buildroot}%{_docdir}/%{name}/v4d/samples
+for f in %{_builddir}/extra_modules/v4d/doc/samples/*.markdown; do
+    install -m 0644 "$f" %{buildroot}%{_docdir}/%{name}/v4d/samples/
+done
+
+# ---- Plan test sources (for downstream rebuilders / test suites) ----
+install -d %{buildroot}%{_datadir}/%{name}/plan/test
+install -m 0644 %{_builddir}/extra_modules/plan/test/*.cpp \
+    %{_builddir}/extra_modules/plan/test/*.hpp \
+    %{buildroot}%{_datadir}/%{name}/plan/test/
+
+# ---- V4D sample sources ----
+install -d %{buildroot}%{_datadir}/%{name}/v4d/samples
+install -m 0644 %{_builddir}/extra_modules/v4d/samples/*.cpp \
+    %{_builddir}/extra_modules/v4d/samples/*.hpp \
+    %{buildroot}%{_datadir}/%{name}/v4d/samples/
+install -d %{buildroot}%{_datadir}/%{name}/v4d/samples/fonts
+install -m 0644 %{_builddir}/extra_modules/v4d/samples/fonts/*.ttf \
+    %{buildroot}%{_datadir}/%{name}/v4d/samples/fonts/
+
 %if 0%{?suse_version}
 %fdupes %{buildroot}%{_prefix}
 %endif
@@ -345,9 +393,14 @@ install -m 0644 CONTRIBUTING.md %{buildroot}%{_docdir}/%{name}/CONTRIBUTING.md
 %{_datadir}/opencv4/valgrind_3rdparty.supp
 %{_licensedir}/opencv4/
 
-%files -n plan-v4d-libs
+%files -n plan-v4d-docs
+%dir %{_docdir}/%{name}
 %license %{_docdir}/%{name}/LICENSE
 %doc %{_docdir}/%{name}/CONTRIBUTING.md
+%doc %{_docdir}/%{name}/plan/
+%doc %{_docdir}/%{name}/v4d/
+
+%files -n plan-v4d-libs
 %dir %{_docdir}/%{name}
 %{_libdir}/libopencv*.so.*
 %{_libdir}/libnanovg.so*
@@ -359,9 +412,12 @@ install -m 0644 CONTRIBUTING.md %{buildroot}%{_docdir}/%{name}/CONTRIBUTING.md
 %{_libdir}/libopencv*.so
 %{_libdir}/pkgconfig/opencv*.pc
 %{_libdir}/cmake/opencv4/
+%dir %{_datadir}/%{name}
+%{_datadir}/%{name}/plan/test/
 
 %files -n plan-v4d-samples
 %{_bindir}/example_v4d_*
+%{_datadir}/%{name}/v4d/samples/
 
 %changelog
 * Tue Sep 01 2026 elchaschab <elchaschab@users.noreply.github.com> - 4.13.0~beta~kallaballa-1

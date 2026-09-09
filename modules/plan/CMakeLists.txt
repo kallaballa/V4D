@@ -21,3 +21,12 @@ if(NOT (TARGET ${the_module}))
 
   target_compile_features(${the_module} PRIVATE cxx_std_20)
 endif()
+
+# Accuracy test suite (Plan features only; no V4D).
+# Requires C++20 for the test target because plan.hpp uses <barrier>/<semaphore>.
+if(BUILD_TESTS AND NOT BUILD_opencv_world)
+  ocv_add_accuracy_tests()
+  if(TARGET opencv_test_plan)
+    target_compile_features(opencv_test_plan PRIVATE cxx_std_20)
+  endif()
+endif()

@@ -332,9 +332,9 @@ for target in "${TARGETS[@]}"; do
     echo "  working copy: $WORK_DIR"
 
     # Sync with OBS
-    (cd "$WORK_DIR" && osc -A "$OBS_API" up >/dev/null 2>&1 || true)
+    (cd "$WORK_DIR" && osc -A "$OBS_API" up || true)
 
-    pushd "$WORK_DIR" >/dev/null
+    pushd "$WORK_DIR"
 
     # Remove stale _service (broken obs_scm) if it ever reappears
     if [[ -e _service ]]; then

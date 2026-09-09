@@ -148,6 +148,37 @@ override_dh_auto_install:
 	install -d debian/tmp/usr/share/doc/plan-v4d
 	install -m 0644 LICENSE debian/tmp/usr/share/doc/plan-v4d/LICENSE
 	install -m 0644 CONTRIBUTING.md debian/tmp/usr/share/doc/plan-v4d/CONTRIBUTING.md
+	# Plan-DSL documentation
+	install -d debian/tmp/usr/share/doc/plan-v4d/plan
+	install -m 0644 $(CURDIR)/extra_modules/plan/README.md \
+	    debian/tmp/usr/share/doc/plan-v4d/plan/README.md
+	install -m 0644 $(CURDIR)/extra_modules/plan/doc/plan-dsl-programming-guide.markdown \
+	    debian/tmp/usr/share/doc/plan-v4d/plan/plan-dsl-programming-guide.markdown
+	install -m 0644 $(CURDIR)/extra_modules/plan/doc/plan-dsl-reference.markdown \
+	    debian/tmp/usr/share/doc/plan-v4d/plan/plan-dsl-reference.markdown
+	# V4D documentation
+	install -d debian/tmp/usr/share/doc/plan-v4d/v4d
+	install -m 0644 $(CURDIR)/extra_modules/v4d/README.md \
+	    debian/tmp/usr/share/doc/plan-v4d/v4d/README.md
+	install -m 0644 $(CURDIR)/extra_modules/v4d/doc/v4d-application-programming-guide.markdown \
+	    debian/tmp/usr/share/doc/plan-v4d/v4d/v4d-application-programming-guide.markdown
+	install -d debian/tmp/usr/share/doc/plan-v4d/v4d/samples
+	for f in $(CURDIR)/extra_modules/v4d/doc/samples/*.markdown; do \
+	    install -m 0644 "$$f" debian/tmp/usr/share/doc/plan-v4d/v4d/samples/ ; \
+	done
+	# Plan test sources
+	install -d debian/tmp/usr/share/plan-v4d/plan/test
+	install -m 0644 $(CURDIR)/extra_modules/plan/test/*.cpp \
+	    $(CURDIR)/extra_modules/plan/test/*.hpp \
+	    debian/tmp/usr/share/plan-v4d/plan/test/
+	# V4D sample sources
+	install -d debian/tmp/usr/share/plan-v4d/v4d/samples
+	install -m 0644 $(CURDIR)/extra_modules/v4d/samples/*.cpp \
+	    $(CURDIR)/extra_modules/v4d/samples/*.hpp \
+	    debian/tmp/usr/share/plan-v4d/v4d/samples/
+	install -d debian/tmp/usr/share/plan-v4d/v4d/samples/fonts
+	install -m 0644 $(CURDIR)/extra_modules/v4d/samples/fonts/*.ttf \
+	    debian/tmp/usr/share/plan-v4d/v4d/samples/fonts/
 
 override_dh_auto_clean:
 	rm -rf build

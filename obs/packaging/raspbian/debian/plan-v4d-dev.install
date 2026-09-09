@@ -4,3 +4,6 @@ usr/lib/*/libopencv*.so usr/lib/
 usr/lib/*/pkgconfig/opencv*.pc usr/lib/*/pkgconfig/
 usr/lib/*/cmake/opencv4 usr/lib/*/cmake/
 usr/bin/setup_vars_opencv4.sh usr/bin/
+usr/share/doc/plan-v4d/plan usr/share/doc/plan-v4d/
+usr/share/doc/plan-v4d/v4d usr/share/doc/plan-v4d/
+usr/share/plan-v4d/plan/test usr/share/plan-v4d/plan/
