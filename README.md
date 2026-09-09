@@ -1,8 +1,7 @@
 # Plan-DSL & V4D
 
 Unofficial [OpenCV](https://opencv.org/) contrib modules for building per-frame
-computation graphs that drive video, image, GPU, and GUI applications from a
-single C++ class.
+computation graphs that drive video, image, GPU, and GUI applications in parallel.
 
 * **[plan](modules/plan/README.md)** — a **type-safe, dataflow-oriented C++ eDSL**
   (embedded domain-specific language). You describe one iteration of a frame
