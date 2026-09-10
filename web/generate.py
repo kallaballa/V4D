@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DOCS = {
+    "Readme": REPO_ROOT / "README.md",
     "V4D Application Programming Guide": REPO_ROOT / "modules/v4d/doc/v4d-application-programming-guide.markdown",
     "Plan-DSL Programming Guide": REPO_ROOT / "modules/plan/doc/plan-dsl-programming-guide.markdown",
     "Plan-DSL Reference (ISA)": REPO_ROOT / "modules/plan/doc/plan-dsl-reference.markdown",
@@ -943,8 +944,8 @@ def main():
     content_html = ""
     for sec in all_sections:
         content_html += f'<div class="doc-section" id="{sec["id"]}" data-doc="{escape_html(sec.get("prefix", ""))}">\n'
-        content_html += f'<h1>{escape_html(sec["title"])}<a href="#{sec["id"]}" class="section-anchor">#</a></h1>\n'
-        content_html += sec.get("html", "") + "\n"
+        content_html += f'<h2>{escape_html(sec["title"])}<a href="#{sec["id"]}" class="section-anchor">#</a></h2>\n'
+        content_html += sec.get("html", "") + '\n'
         content_html += "</div>\n"
     
     # Assemble final HTML
