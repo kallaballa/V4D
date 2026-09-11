@@ -236,58 +236,8 @@ detector and the LBF landmark model ship in
 
 ## Packaging
 
-The project ships Debian packaging (`plan-v4d.dsc` + `debian/`), an OBS recipe
-(`obs/plan-v4d.spec`), and a Flatpak manifest
-(`flatpak/io.github.kallaballa.PlanV4D.yml`).
-
-### Flatpak
-
-The Flatpak package builds OpenCV with OpenGL, OpenCL, FFmpeg, NanoVG, and GLFW
-support, and bundles all V4D demo applications with bundled demo videos.
-
-**Prerequisites:** `flatpak` and `flatpak-builder` installed (available in most
-distro repositories).
-
-**Build and install:**
-
-```bash
-cd flatpak
-./build.sh
-```
-
-This will:
-1. Build all modules (OpenCL headers/loader, GLFW, GLU, OpenCV + Plan-V4D)
-2. Install the app to your user Flatpak installation
-
-**Run a specific demo:**
-
-```bash
-flatpak run io.github.kallaballa.PlanV4D cube-demo
-flatpak run io.github.kallaballa.PlanV4D beauty-demo
-```
-
-**Run the demo picker (zenity GUI):**
-
-```bash
-flatpak run io.github.kallaballa.PlanV4D
-```
-
-Demos that require a video input (beauty-demo, pedestrian-demo, optflow-demo,
-video-demo, montage-demo, shader-demo, nanovg-demo, video_editing) are
-automatically wired to bundled demo clips.
-
-**Or build manually without `build.sh`:**
-
-```bash
-flatpak-builder --user --repo=$HOME/planv4d-flatpak --force-clean \
-    build/ flatpak/io.github.kallaballa.PlanV4D.yml
-flatpak remote-add --user --if-not-exists planv4d-local \
-    $HOME/planv4d-flatpak --no-gpg-verify
-flatpak install --user planv4d-local io.github.kallaballa.PlanV4D -y
-```
-
-**Publishing to Flathub:** see the [Flathub publishing
-guide](HANDOFF.md#9-publishing-to-flathub) in HANDOFF.md.
+The project ships Debian packaging (`plan-v4d.dsc` + `debian/`) and an OBS recipe
+(`obs/plan-v4d.spec`).
 
 ## License
 
