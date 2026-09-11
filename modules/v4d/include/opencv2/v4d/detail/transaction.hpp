@@ -18,6 +18,12 @@ class Plan;
 
 namespace detail {
 
+using cv::plan::detail::values_equal;
+using cv::plan::detail::default_type;
+using cv::plan::detail::return_t;
+using cv::plan::detail::element_t;
+using cv::plan::GlobalState;
+
 enum Operators {
 	CONSTRUCT_,
 	ASSIGN_,
@@ -423,18 +429,18 @@ public:
 		} else {
 			if constexpr(issmart_t::value){
 				if constexpr(shared_t::value) {
-					Global::instance().safe_copy(*ptr()->get(), *copyPtr_.get());
+					GlobalState::shared_vars().safe_copy(*ptr()->get(), *copyPtr_.get());
 					return copyPtr_;
 				} else {
-					Global::instance().copy(*ptr()->get(), *copyPtr_.get());
+					GlobalState::shared_vars().copy(*ptr()->get(), *copyPtr_.get());
 					return copyPtr_;
 				}
 			} else {
 				if constexpr(shared_t::value) {
-					Global::instance().safe_copy(*ptr(), *copyPtr_);
+					GlobalState::shared_vars().safe_copy(*ptr(), *copyPtr_);
 					return *copyPtr_;
 				} else {
-					Global::instance().copy(*ptr(), *copyPtr_);
+					GlobalState::shared_vars().copy(*ptr(), *copyPtr_);
 					return *copyPtr_;
 				}
 			}
@@ -444,9 +450,9 @@ public:
     void copyBack() {
     	if constexpr(!read_t::value && (copy_t::value || iswriteable_func_t::value)) {
     		if constexpr(shared_t::value) {
-    			Global::instance().safe_copy(*copyPtr_, *ptr_);
+    			GlobalState::shared_vars().safe_copy(*copyPtr_, *ptr_);
     		} else {
-    			Global::instance().copy(*copyPtr_, *ptr_);
+    			GlobalState::shared_vars().copy(*copyPtr_, *ptr_);
     		}
     	}
     }
@@ -454,7 +460,7 @@ public:
     std::mutex& getMutex() {
     	static_assert(lockie_t::value, "Internal Error: Trying to get mutex from a non-lockie edge");
     	//uses the no check variant because this should never fail due to previous checks.
-    	return *Global::instance().getMutexPtr(*ptr(), true);
+    	return *GlobalState::shared_vars().getMutexPtr(*ptr(), true);
     }
 
     bool tryLock() {
@@ -546,7 +552,7 @@ auto perform_lock_from_tuple(Ttuple& t,  std::index_sequence<Tidx...>) {
 		size_t cnt = 0;
 		(((std::get<Tidx>(t).tryLock() && std::get<Tidx>(t).unlock()) || ++cnt), ...);
 
-		Global::instance().apply<size_t>(Global::Keys::LOCK_CONTENTION_CNT, [cnt](size_t& v){
+		GlobalState::apply<size_t>(GlobalState::Keys::LOCK_CONTENTION_CNT, [cnt](size_t& v){
 			v += cnt;
 			return v;
 		});
