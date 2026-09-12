@@ -427,7 +427,18 @@ public:
                     resetZoom(state, sz);
                 if (IsKeyPressed(ImGuiKey_P)) resetZoom(state, sz);
                 if (IsKeyPressed(ImGuiKey_X)) zoomRegion(state, sz);
-                if (IsKeyPressed(ImGuiKey_S)) state.showSaveDialog_ = true;
+                bool saveViewShortcut = (IsKeyDown(ImGuiKey_LeftShift) ||
+                                         IsKeyDown(ImGuiKey_RightShift)) &&
+                                        IsKeyPressed(ImGuiKey_S);
+                if (saveViewShortcut) {
+                    std::snprintf(state.saveBuf_, sizeof(state.saveBuf_),
+                                  "%s", filename_.c_str());
+                    state.showSaveViewDialog_ = true;
+                } else if (IsKeyPressed(ImGuiKey_S)) {
+                    std::snprintf(state.saveBuf_, sizeof(state.saveBuf_),
+                                  "%s", filename_.c_str());
+                    state.showSaveDialog_ = true;
+                }
                 if (IsKeyPressed(ImGuiKey_C)) {
                     // Copy the original image (not the viewport) to clipboard
                     // via xclip on Linux. Best-effort, no GUI feedback.
@@ -457,9 +468,13 @@ public:
             if (BeginMainMenuBar()) {
                 if (BeginMenu("File")) {
                     if (MenuItem("Save image as...", "Ctrl+S")) {
+                        std::snprintf(state.saveBuf_, sizeof(state.saveBuf_),
+                                      "%s", filename_.c_str());
                         state.showSaveDialog_ = true;
                     }
                     if (MenuItem("Save view as...", "Ctrl+Shift+S")) {
+                        std::snprintf(state.saveBuf_, sizeof(state.saveBuf_),
+                                      "%s", filename_.c_str());
                         state.showSaveViewDialog_ = true;
                     }
                     Separator();

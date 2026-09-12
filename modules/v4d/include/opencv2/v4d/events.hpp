@@ -66,6 +66,7 @@ struct DefaultPoint {
 
 // ---------- Callback typedefs ----------
 typedef std::function<bool(GLFWwindow *, int, int, int, int)> KeyCallback;
+typedef std::function<bool(GLFWwindow*, unsigned int)>        CharCallback;
 typedef std::function<bool(GLFWwindow*, int, int, int)>       MouseButtonCallback;
 typedef std::function<bool(GLFWwindow*, double, double)>      ScrollCallback;
 typedef std::function<bool(GLFWwindow*, double, double)>      CursorPosCallback;
@@ -270,6 +271,7 @@ public:
     static std::pair<int, int>   window_size;
     static GLFWwindow*           main_window;
     static KeyCallback           keyboardCallback;
+    static CharCallback          charCallback;
     static MouseButtonCallback   mouseButtonCallback;
     static ScrollCallback        scrollCallback;
     static CursorPosCallback     cursorPosCallback;
@@ -285,6 +287,7 @@ public:
 inline std::pair<int, int> Holder::window_size = {0, 0};
 inline GLFWwindow*         Holder::main_window = nullptr;
 inline KeyCallback         Holder::keyboardCallback = {};
+inline CharCallback        Holder::charCallback = {};
 inline MouseButtonCallback Holder::mouseButtonCallback = {};
 inline ScrollCallback      Holder::scrollCallback = {};
 inline CursorPosCallback   Holder::cursorPosCallback = {};
@@ -731,12 +734,14 @@ inline void init(
     WindowFocusCallback windowFocusCallback  = WindowFocusCallback(),
     WindowCloseCallback windowCloseCallback  = WindowCloseCallback(),
     CursorPosCallback   cursorPosCallback    = CursorPosCallback(),
-    CursorEnterCallback cursorEnterCallback  = CursorEnterCallback()
+    CursorEnterCallback cursorEnterCallback  = CursorEnterCallback(),
+    CharCallback        charCallback         = CharCallback()
 ) {
     GLFWwindow* win = glfwGetCurrentContext();
     assert(win);
     detail::Holder::main_window         = win;
     detail::Holder::keyboardCallback    = keyboardCallback;
+    detail::Holder::charCallback        = charCallback;
     detail::Holder::mouseButtonCallback = mouseButtonCallback;
     detail::Holder::scrollCallback      = scrollCallback;
     detail::Holder::cursorPosCallback   = cursorPosCallback;
@@ -758,6 +763,15 @@ inline void init(
                     auto event = std::make_shared<Keyboard>(type, k);
                     detail::push(event);
                 }
+            }
+        });
+
+    // Character input (needed by ImGui text fields and text-aware apps)
+    glfwSetCharCallback(win,
+        [](GLFWwindow *window, unsigned int codepoint) {
+            if (!detail::Holder::charCallback ||
+                !detail::Holder::charCallback(window, codepoint)) {
+                // No native text event; reserved for future use.
             }
         });
 

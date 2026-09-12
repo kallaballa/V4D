@@ -318,16 +318,25 @@ void FrameBufferContext::init() {
                   return ImGui::GetIO().WantCaptureMouse;
               }
               return false;
-          }, [](GLFWwindow *window, double xpos, double ypos) {
+          }, [](GLFWwindow *window, int w, int h) {
+              CV_UNUSED(window);
+              V4D::instance()->set(V4D::Keys::WINDOW_SIZE, cv::Size(w, h), false);
+              return false;
+          }, gwe::WindowPosCallback(), gwe::WindowFocusCallback(), gwe::WindowCloseCallback(),
+          [](GLFWwindow *window, double xpos, double ypos) {
               ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
               if(ImGui::GetCurrentContext()) {
                   return ImGui::GetIO().WantCaptureMouse;
               }
               return false;
-          }, [](GLFWwindow *window, int w, int h) {
-              CV_UNUSED(window);
-              V4D::instance()->set(V4D::Keys::WINDOW_SIZE, cv::Size(w, h), false);
-              return false;
+          }, gwe::CursorEnterCallback(),
+          [](GLFWwindow *window, unsigned int codepoint) {
+              ImGui_ImplGlfw_CharCallback(window, codepoint);
+              if(ImGui::GetCurrentContext()) {
+                  return ImGui::GetIO().WantCaptureKeyboard;
+              } else {
+                  return false;
+              }
           }
       );
     }
