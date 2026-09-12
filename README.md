@@ -239,6 +239,76 @@ detector and the LBF landmark model ship in
 The project ships Debian packaging (`plan-v4d.dsc` + `debian/`) and an OBS recipe
 (`obs/plan-v4d.spec`).
 
+## Installing the packages
+
+The OBS recipes under [`obs/`](obs/) build binary packages for four targets. The
+same runtime is shipped everywhere; only the package names differ:
+
+| Target | Format | Packages |
+|---|---|---|
+| openSUSE Tumbleweed | RPM (x86_64) | `plan-v4d-libs`, `plan-v4d-devel`, `plan-v4d-data`, `plan-v4d-docs`, `plan-v4d-samples` |
+| Fedora | RPM (x86_64) | `plan-v4d-libs`, `plan-v4d-devel`, `plan-v4d-data`, `plan-v4d-docs`, `plan-v4d-samples` |
+| Ubuntu 24.04 | DEB (amd64 and aarch64) | `plan-v4d-libs`, `plan-v4d-dev`, `plan-v4d-data`, `plan-v4d-samples` |
+| Raspberry Pi OS (Debian 12) | DEB (armv7l and aarch64) | `plan-v4d-libs`, `plan-v4d-dev`, `plan-v4d-data`, `plan-v4d-samples` |
+
+What each package provides:
+
+| Package | Contents |
+|---|---|
+| `plan-v4d-libs` | Shared libraries (`libopencv_*.so`, `libnanovg.so`). |
+| `plan-v4d-devel` / `plan-v4d-dev` | Headers, pkgconfig and CMake config for building against the modules. |
+| `plan-v4d-data` | Pre-trained models, cascade classifiers, fonts (`/usr/share/opencv4`). |
+| `plan-v4d-docs` (RPM only) | Programming guides and module documentation. |
+| `plan-v4d-samples` | `example_v4d_*` binaries plus sample sources. |
+
+### From the OBS repository
+
+Once the binaries are published, you can add the Open Build Service repository
+for your distro and install by name, so updates arrive through the normal
+package manager — no manual `.rpm`/`.deb` download needed. Replace
+`elchaschab` with the OBS username that owns the project (the same one used with
+`./obs/osc-setup.sh elchaschab`).
+
+**openSUSE Tumbleweed**
+
+```bash
+sudo zypper ar \
+  https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:openSUSE_Tumbleweed/openSUSE_Tumbleweed/ \
+  plan-v4d
+sudo zypper refresh
+sudo zypper install plan-v4d-libs plan-v4d-devel
+```
+
+**Fedora**
+
+```bash
+sudo dnf config-manager --add-repo \
+  https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Fedora/Fedora/home:elchaschab:Plan-V4D:Fedora.repo
+sudo dnf install plan-v4d-libs plan-v4d-devel
+```
+
+**Ubuntu 24.04**
+
+```bash
+echo "deb https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Ubuntu_24.04/Ubuntu_24.04/ /" | \
+  sudo tee /etc/apt/sources.list.d/plan-v4d.list
+sudo apt update
+sudo apt install plan-v4d-libs plan-v4d-dev
+```
+
+**Raspberry Pi OS (Debian 12)**
+
+```bash
+echo "deb https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Raspbian_12/Raspbian_12/ /" | \
+  sudo tee /etc/apt/sources.list.d/plan-v4d.list
+sudo apt update
+sudo apt install plan-v4d-libs plan-v4d-dev
+```
+
+Swap `plan-v4d-devel`/`plan-v4d-dev` for `plan-v4d-samples` to get the
+demonstration programs instead of the development headers, or install
+`plan-v4d-data` to pull in the pre-trained models and fonts.
+
 ## License
 
 Apache 2.0, like the rest of OpenCV — see [LICENSE](LICENSE). Vendored
