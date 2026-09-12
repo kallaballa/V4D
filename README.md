@@ -263,12 +263,6 @@ What each package provides:
 
 ### From the OBS repository
 
-Once the binaries are published, you can add the Open Build Service repository
-for your distro and install by name, so updates arrive through the normal
-package manager — no manual `.rpm`/`.deb` download needed. Replace
-`elchaschab` with the OBS username that owns the project (the same one used with
-`./obs/osc-setup.sh elchaschab`).
-
 **openSUSE Tumbleweed**
 
 ```bash
