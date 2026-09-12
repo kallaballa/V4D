@@ -248,7 +248,6 @@ void FrameBufferContext::init() {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
     glfwWindowHint(GLFW_DEPTH_BITS, 24);
     glfwWindowHint(GLFW_RESIZABLE, configFlags() & FBConfigFlags::RESIZEABLE ? GLFW_TRUE : GLFW_FALSE);
-    std::cerr << "par:" << hasParent() << " root:" << isRoot() << std::endl;
     glfwWindowHint(GLFW_VISIBLE, !isRoot() || (configFlags() & FBConfigFlags::OFFSCREEN) ? GLFW_FALSE : GLFW_TRUE );
 //    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 
