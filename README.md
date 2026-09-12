@@ -263,41 +263,62 @@ What each package provides:
 
 ### From the OBS repository
 
-**openSUSE Tumbleweed**
+Once the binaries are published, add the Open Build Service repo to your distro
+and install by name, so updates arrive through the normal package manager. The
+`download.opensuse.org` paths below contain the exact format that exists on the
+server: `home:/<user>:/Plan-V4D:/<subproject>/<repo>`. Note that the DEB
+repositories are signed and split per architecture.
+
+**openSUSE Tumbleweed** (x86_64)
 
 ```bash
 sudo zypper ar \
-  https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:openSUSE_Tumbleweed/openSUSE_Tumbleweed/ \
+  https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/openSUSE_Tumbleweed/openSUSE_Tumbleweed/ \
   plan-v4d
 sudo zypper refresh
 sudo zypper install plan-v4d-libs plan-v4d-devel
 ```
 
-**Fedora**
+**Fedora** (x86_64)
 
 ```bash
 sudo dnf config-manager --add-repo \
-  https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Fedora/Fedora/home:elchaschab:Plan-V4D:Fedora.repo
-sudo dnf install plan-v4d-libs plan-v4d-devel
+  https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/Fedora/Fedora/home:elchaschab:Plan-V4D:Fedora.repo
+sudo dnf install plan-v4d-libs plan-v4d-dev
 ```
 
-**Ubuntu 24.04**
+**Ubuntu 24.04** (DEB) — pick the repo matching your architecture (`Ubuntu_24.04`
+for amd64, `Ubuntu_24.04_arm64` for aarch64). The apt source must reference the
+repo's signing key, fetched from its published `Release.key`; the same command
+rewrites an existing unsigned `plan-v4d.list`.
+
+*amd64:*
 
 ```bash
-echo "deb https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Ubuntu_24.04/Ubuntu_24.04/ /" | \
-  sudo tee /etc/apt/sources.list.d/plan-v4d.list
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/Ubuntu_24.04/Ubuntu_24.04/Release.key \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/plan-v4d-archive-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/plan-v4d-archive-keyring.gpg] https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/Ubuntu_24.04/Ubuntu_24.04/ /" \
+  | sudo tee /etc/apt/sources.list.d/plan-v4d.list
 sudo apt update
 sudo apt install plan-v4d-libs plan-v4d-dev
 ```
 
-**Raspberry Pi OS (Debian 12)**
+*aarch64:*
 
 ```bash
-echo "deb https://download.opensuse.org/repositories/home:elchaschab:Plan-V4D:Raspbian_12/Raspbian_12/ /" | \
-  sudo tee /etc/apt/sources.list.d/plan-v4d.list
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/Ubuntu_24.04_arm64/Ubuntu_24.04/Release.key \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/plan-v4d-archive-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/plan-v4d-archive-keyring.gpg] https://download.opensuse.org/repositories/home:/elchaschab:/Plan-V4D:/Ubuntu_24.04_arm64/Ubuntu_24.04/ /" \
+  | sudo tee /etc/apt/sources.list.d/plan-v4d.list
 sudo apt update
 sudo apt install plan-v4d-libs plan-v4d-dev
 ```
+
+**Raspberry Pi OS (Debian 12)** (DEB) — same pattern as Ubuntu, with the
+`Raspbian_12` repo path in place of the `Ubuntu_24.04` one (arch-suffixed,
+e.g. `Raspbian_12_arm64`, once its binaries are published).
 
 Swap `plan-v4d-devel`/`plan-v4d-dev` for `plan-v4d-samples` to get the
 demonstration programs instead of the development headers, or install
