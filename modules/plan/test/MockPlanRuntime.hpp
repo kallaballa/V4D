@@ -5,6 +5,9 @@
 #define OPENCV_PLAN_MOCK_RUNTIME_HPP_
 
 #include "opencv2/plan/plan.hpp"
+#include <atomic>
+#include <chrono>
+#include <functional>
 #include <mutex>
 
 namespace cv {
@@ -16,6 +19,12 @@ class MockPlanRuntime : public PlanRuntime {
     mutable std::mutex mtx_;
     int framesLeft_;
     bool guiCalled_ = false;
+    // Frame-loop-only timing: every thread shares this runtime instance, so the
+    // accumulators below sum the per-thread frame times across all frame loops.
+    // Only the frameFn() invocations inside runFrameLoop() are timed - spawn,
+    // per-thread infer/makeGraph, barrier, and join are excluded.
+    std::atomic<long long> frameNs_ {0};
+    std::atomic<long long> framesRun_ {0};
 
 public:
     explicit MockPlanRuntime(int frameCount = 3) : framesLeft_(frameCount) {}
@@ -53,11 +62,23 @@ public:
 
     void runFrameLoop(std::function<void()> frameFn) override {
         for (int i = 0; i < framesLeft_; ++i) {
+            const auto t0 = std::chrono::steady_clock::now();
             frameFn();
+            const auto t1 = std::chrono::steady_clock::now();
+            frameNs_ += std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0).count();
+            ++framesRun_;
         }
     }
 
     void releaseIo() override {}
+
+    void resetFrames() {
+        frameNs_ = 0;
+        framesRun_ = 0;
+    }
+
+    long long frameNs() const { return frameNs_.load(); }
+    long long framesRun() const { return framesRun_.load(); }
 
     bool guiCalled() const { return guiCalled_; }
 };

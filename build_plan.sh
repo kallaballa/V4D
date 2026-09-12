@@ -2,19 +2,14 @@
 
 BUILD_DIR=/home/elchaschab/devel/opencv/build
 
-# Skip the full clean rebuild when a previously configured build already has
-# the plan test module wired in. Only wipe when the cache is missing or was
-# configured without the plan tests.
-if [ ! -f "$BUILD_DIR/CMakeCache.txt" ] || ! grep -Eq "OPENCV_BUILD_TEST_MODULES_LIST:STRING=plan" "$BUILD_DIR/CMakeCache.txt"; then
-  echo "No plan-enabled build cache found; cleaning and reconfiguring in $BUILD_DIR"
-  rm -rf "$BUILD_DIR"
-  mkdir -p "$BUILD_DIR"
-fi
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
 
 cd "$BUILD_DIR"
 
 cmake --fresh \
   -DOPENCV_BUILD_TEST_MODULES_LIST=plan \
+  -DOPENCV_BUILD_PERF_TEST_MODULES_LIST=plan \
   -DWITH_WAYLAND=ON \
   -DOPENCV_V4D_ENABLE_ES3=OFF \
   -DOPENCV_V4D_ENABLE_BGFX=OFF \
@@ -151,7 +146,7 @@ cmake --fresh \
   -DBUILD_EXAMPLES=ON \
   -DBUILD_PACKAGE=ON \
   -DBUILD_TESTS=ON \
-  -DBUILD_PERF_TESTS=OFF \
+  -DBUILD_PERF_TESTS=ON \
   -DBUILD_DOCS=OFF \
   -DWITH_PTHREADS_PF=ON \
   -DCV_ENABLE_INTRINSICS=ON \
@@ -170,3 +165,12 @@ if [ -x ./bin/opencv_test_plan ]; then
 else
   ./opencv_test_plan "$@"
 fi
+
+make -j4 opencv_perf_plan
+
+if [ -x ./bin/opencv_perf_plan ]; then
+  ./bin/opencv_perf_plan "$@"
+else
+  ./opencv_perf_plan "$@"
+fi
+

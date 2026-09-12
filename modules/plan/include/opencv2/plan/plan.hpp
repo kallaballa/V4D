@@ -459,6 +459,24 @@ protected:
 		currentNodes_.clear();
 	}
 
+	// Break every ref-count cycle that would otherwise keep this plan (and its
+	// whole graph) alive forever: the Edge -> Plan back-refs inside each
+	// transaction's arguments and the self_ handle. Call once all graph work is
+	// done (after teardown) so the plan and its nodes/transactions/functions are
+	// actually freed when the outer cv::Ptr drops.
+public:
+	void release() {
+		for(auto& kv : transactions_)
+			kv.second->releasePlanRefs();
+		self_ = nullptr;
+		accesses_.clear();
+		branchStateStack_.clear();
+		branchStack_.clear();
+		transactions_.clear();
+		currentNodes_.clear();
+		allNodes_.clear();
+	}
+
 	template<typename Tinstance>
     cv::Ptr<Tinstance> self() {
 		if(!self_)
@@ -534,12 +552,20 @@ public:
 	constexpr static auto and_ = [](const bool& a, const bool& b) { return a && b; };
 	constexpr static auto or_ = [](const bool& a, const bool& b) { return a || b; };
 
+	static inline std::atomic<long> g_live{0};
+	static inline std::atomic<long> g_ctor{0};
+
 	Plan() {
+		g_ctor.fetch_add(1);
+		g_live.fetch_add(1);
 		if(PlanRuntime::current())
 			runtime_ = PlanRuntime::current();
 	}
 
-	virtual ~Plan() { self_ = nullptr; };
+	virtual ~Plan() {
+		g_live.fetch_sub(1);
+		self_ = nullptr;
+	};
 	virtual void gui() { };
 	virtual void setup() { };
 	virtual void infer() = 0;
@@ -1226,12 +1252,16 @@ return LocalState::get<size_t>(LocalState::Keys::WORKER_INDEX) == static_cast<si
 				CV_Error_(cv::Error::StsError, ("Pipeline teardown failed: %s", ex.what()));
 			}
 			plan->runtime()->releaseIo();
+			plan->release(); // break Edge->Plan + self_ cycles; frees this worker's plan+graph
 			CV_LOG_DEBUG(nullptr, "Teardown complete on worker: " << LocalState::get<size_t>(LocalState::Keys::WORKER_INDEX));
 		} else {
-			for(auto& t : threads)
+			for(auto& t : threads) {
 				t->join();
+				delete t; // was leaked
+			}
 			CV_LOG_INFO(nullptr, "All threads terminated.");
 			plan->runtime()->releaseIo();
+			plan->release(); // break Edge->Plan + self_ cycles; frees main's plan+graph
 		}
 	}
 

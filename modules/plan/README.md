@@ -103,45 +103,9 @@ modules/plan/
 
 ## Building
 
-This is an OpenCV extra module. Build it the standard way:
-
 ```bash
-mkdir build && cd build
-cmake -DOPENCV_EXTRA_MODULES_PATH=../modules ..
-cmake --build . --target opencv_plan
+./build_plan.sh
 ```
-
-The runtime needs at least one `PlanRuntime` to drive frames. The
-V4D module provides one; for testing you can write your own by
-implementing `PlanRuntime::plainCtx()`, `runFrameLoop()` and the
-worker-init hooks.
-
-## Building on macOS
-
-`plan` is a pure-CPU, header-plus-single-TU module — unlike V4D it
-does **not** need GLFW, OpenGL, or any windowing system, so no
-extra system libraries are required on macOS.
-
-Requirements:
-
-* macOS 13+ (Ventura) with Xcode 14+ (Apple Clang 14+ / libc++ 14+).
-  The runtime uses C++20 `<barrier>` and `<semaphore>`, which need a
-  libc++ new enough to ship them.
-* Homebrew's `opencv` (or build the main OpenCV tree from source).
-
-Build it the standard extra-module way on a Mac:
-
-```bash
-mkdir build && cd build
-cmake -DOPENCV_EXTRA_MODULES_PATH=../modules \
-      -DBUILD_opencv_plan=ON \
-      ..
-cmake --build . --target opencv_plan
-```
-
-macOS builds of Plan are verified continuously in CI via the
-dedicated `macOS-ARM64-v4d` and `macOS-X64-v4d` GitHub Actions jobs
-in `.github/workflows/PR-next.yaml`.
 
 ## License
 

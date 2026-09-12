@@ -341,6 +341,15 @@ private:
 public:
 	virtual ~Edge() {
 	}
+
+	// Break the Edge -> Plan back-reference at graph teardown. Every Edge lives
+	// inside a graph owned by the Plan, so the strong Plan backlink forms a
+	// ref-count cycle (Plan -> nodes -> transactions -> Edge -> Plan) that would
+	// otherwise keep the Plan (and its whole graph) alive forever. Plan::release
+	// calls this on every transaction's edges before dropping the graph.
+	void clearPlan() {
+		plan_.reset();
+	}
 	using pass_t = typename std::disjunction<
 			values_equal<func_t::value, true, base_t>,
 			values_equal<byvalue_t::value, true, base_t>,
@@ -535,6 +544,10 @@ public:
 	CV_EXPORTS BranchType::Enum getBranchType();
 	CV_EXPORTS void setContextCallback(std::function<cv::Ptr<cv::plan::detail::PlanContext>()> ctx);
 	CV_EXPORTS std::function<cv::Ptr<cv::plan::detail::PlanContext>()> getContextCallback();
+
+	// Called by Plan::release() to drop every Edge -> Plan back-reference held by
+	// this transaction's arguments, so the Plan can be destroyed.
+	CV_EXPORTS virtual void releasePlanRefs() {}
 };
 
 namespace detail {
@@ -568,9 +581,15 @@ auto perform_lock_from_tuple(Ttuple& t,  std::index_sequence<Tidx...>) {
     }
 }
 
+template <typename T>
+void releaseEdgePlan(T& edge) {
+	if constexpr(std::is_base_of_v<EdgeBase, std::decay_t<T>>) {
+		edge.clearPlan();
+	}
+}
+
 template <bool TcountContention, typename F, typename... Ts>
-class TransactionImpl : public Transaction
-{
+class TransactionImpl : public Transaction {
     static_assert(sizeof...(Ts) == 0 || (!(std::is_rvalue_reference_v<Ts> && ...)));
 private:
     F f;
@@ -596,6 +615,16 @@ public:
 
     virtual ~TransactionImpl() override
 	{}
+
+	// Drop every Edge -> Plan back-reference among this transaction's arguments.
+	// The transaction's args are the DSL edges produced by the owning plan's ops;
+	// each strongly references the producing Plan, so without this the plan would
+	// be pinned alive by its own graph.
+	virtual void releasePlanRefs() override {
+		std::apply([](auto&... arg) {
+			(releaseEdgePlan(arg), ...);
+		}, args_);
+	}
 
     virtual bool ran() override {
     	return ran_;

@@ -44,6 +44,24 @@ struct default_type : std::true_type
     using type = T;
 };
 
+template<typename T>
+struct is_umat : std::false_type {};
+
+template<>
+struct is_umat<cv::UMat> : std::true_type {};
+
+template<typename T>
+struct is_umat<const T> : is_umat<T> {};
+
+template<typename T>
+struct is_umat<volatile T> : is_umat<T> {};
+
+template<typename T>
+struct is_umat<T&> : is_umat<T> {};
+
+template<typename T>
+inline constexpr bool is_umat_v = is_umat<T>::value;
+
 template <typename, typename = void>
 struct has_call_operator_t : std::false_type {};
 
